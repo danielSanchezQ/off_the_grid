@@ -7,7 +7,7 @@ import (
 )
 
 type SipleOperation struct {
-	available_operations map[string]func(int, int) int
+	AvailableOperations map[string]func(int, int) int
 }
 
 func (so *SipleOperation) Sleep(arg *CommSleepArg, reply *CommReply) error {
@@ -18,8 +18,15 @@ func (so *SipleOperation) Sleep(arg *CommSleepArg, reply *CommReply) error {
 }
 
 func (so *SipleOperation) SimpleOperation(arg *CommSimpleOperationArg, reply *CommReply) error {
-	f, ok := so.available_operations[arg.Operator]
+	f, ok := so.AvailableOperations[arg.Operator]
 	if ok {
+		defer func() {
+			recoverResult := recover()
+			if recoverResult != nil {
+				fmt.Fprintf(os.Stdout, "An error occured while performing operation %s\n", recoverResult)
+				reply.Message = fmt.Sprintf("An error occured while performing operation %s\n", recoverResult)
+			}
+		}()
 		res := f(arg.A, arg.B)
 		fmt.Fprintf(os.Stdout, "Computed result (%d %s %d = %d)\n", arg.A, arg.Operator, arg.B, res)
 		reply.Message = fmt.Sprintf("Computed result (%d %s %d = %d)", arg.A, arg.Operator, arg.B, res)
