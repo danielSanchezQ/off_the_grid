@@ -34,8 +34,8 @@ func (mux *ChoseRequestMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case mux.requestType:
 		mux.Dispatch(w, r)
 	default:
-		fmt.Fprint(w, r.URL.String())
-		//http.Redirect(w, r, "", http.StatusNotFound)
+		//fmt.Fprint(w, r.URL.String())
+		http.Redirect(w, r, "", http.StatusNotFound)
 	}
 }
 
